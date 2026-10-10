@@ -1,0 +1,13 @@
+cmake_gcc/build/
+*.o
+*.elf
+*.map
+autogen/sbom/
+.metadata/
+.codex/
+.projectlinkstore
+.silabsExtContext
+*.hex
+*.bin
+*.s37
+*.out
