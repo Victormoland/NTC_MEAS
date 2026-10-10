@@ -170,8 +170,20 @@ static void sample_once(void)
     printf("code=%d cfg=0x%02X %dbit  (sat or invalid)\r\n", code, cfg, bits);
     return;
   }
-  printf("code=%d cfg=0x%02X %dbit  V=%.3f V  R=%.0f ohm  T=%.2f C\r\n",
-         code, cfg, bits, v, r, t);
+  /* This UART printf has no %f (newlib-nano). Print as integers instead. */
+  {
+    int mv = (int)(v * 1000.0f + 0.5f);
+    int ohm = (int)(r + 0.5f);
+    int t100 = (int)(t * 100.0f + (t >= 0.0f ? 0.5f : -0.5f));
+    int t_abs = (t100 < 0) ? -t100 : t100;
+
+    printf("code=%d cfg=0x%02X %dbit  V=%d.%03d V  R=%d ohm  T=%s%d.%02d C\r\n",
+           code, cfg, bits,
+           mv / 1000, mv % 1000,
+           ohm,
+           (t100 < 0) ? "-" : "",
+           t_abs / 100, t_abs % 100);
+  }
 }
 
 static void on_tick(sl_sleeptimer_timer_handle_t *handle, void *data)
@@ -185,7 +197,7 @@ int main(void)
 {
   sl_main_init();
 
-  printf("\r\n*** NTC_meas BUILD 10 — single file ***\r\n");
+  printf("\r\n*** NTC_meas BUILD 11 — integer UART print ***\r\n");
   sl_board_enable_sensor(SL_BOARD_SENSOR_RHT);
   sl_sleeptimer_delay_millisecond(80);
 
